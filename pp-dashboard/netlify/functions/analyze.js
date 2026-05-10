@@ -1,20 +1,27 @@
 export default async (request) => {
+  const corsHeaders = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type"
+  };
+
   if (request.method === "OPTIONS") {
-    return new Response(null, {
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type"
-      }
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  if (request.method !== "POST") {
+    return new Response(JSON.stringify({ error: "Use POST request" }), {
+      status: 405,
+      headers: { ...corsHeaders, "Content-Type": "application/json" }
     });
   }
 
   const apiKey = Netlify.env.get("GEMINI_API_KEY");
 
   if (!apiKey) {
-    return new Response(JSON.stringify({ error: "GEMINI_API_KEY not set" }), {
+    return new Response(JSON.stringify({ error: "API key not set" }), {
       status: 500,
-      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+      headers: { ...corsHeaders, "Content-Type": "application/json" }
     });
   }
 
@@ -23,38 +30,40 @@ export default async (request) => {
     const messages = body.messages || [];
     const systemPrompt = body.system || "";
 
-    const parts = [];
-    if (systemPrompt) parts.push({ text: systemPrompt });
+    const textParts = [];
+
+    if (systemPrompt) textParts.push(systemPrompt);
 
     for (const msg of messages) {
       if (Array.isArray(msg.content)) {
         for (const block of msg.content) {
-          if (block.type === "text") {
-            parts.push({ text: block.text });
-          } else if (block.type === "image") {
-            parts.push({
-              inlineData: {
-                mimeType: block.source.media_type,
-                data: block.source.data
-              }
-            });
+          if (block.type === "text" && block.text) {
+            textParts.push(block.text);
           }
         }
-      } else {
-        parts.push({ text: msg.content });
+      } else if (msg.content) {
+        textParts.push(msg.content);
       }
     }
 
-    const geminiBody = {
-      contents: [{ role: "user", parts }],
-      generationConfig: { maxOutputTokens: 4000, temperature: 0.1 }
+    const openRouterBody = {
+      model: "mistralai/mistral-7b-instruct:free",
+      messages: [
+        {
+          role: "user",
+          content: textParts.join("\n\n")
+        }
+      ],
+      temperature: 0.1
     };
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-    const response = await fetch(url, {
+    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(geminiBody)
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`
+      },
+      body: JSON.stringify(openRouterBody)
     });
 
     const data = await response.json();
@@ -62,19 +71,20 @@ export default async (request) => {
     if (!response.ok) {
       return new Response(JSON.stringify(data), {
         status: response.status,
-        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
       });
     }
 
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    const text = data.choices?.[0]?.message?.content || "";
 
     return new Response(JSON.stringify({ content: [{ type: "text", text }] }), {
-      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+      status: 200,
+      headers: { ...corsHeaders, "Content-Type": "application/json" }
     });
   } catch (err) {
     return new Response(JSON.stringify({ error: err.message }), {
       status: 500,
-      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+      headers: { ...corsHeaders, "Content-Type": "application/json" }
     });
   }
 };
