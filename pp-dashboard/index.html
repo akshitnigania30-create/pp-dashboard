@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Radha Darshan Petropack — Manufacturing Intelligence</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.14.0/dist/tabler-icons.min.css" />
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      :root {
+        --color-background-primary: #ffffff;
+        --color-background-secondary: #f5f5f5;
+        --color-background-tertiary: #ebebeb;
+        --color-background-danger: #fef2f2;
+        --color-background-warning: #fffbeb;
+        --color-background-success: #f0fdf4;
+        --color-background-info: #eff6ff;
+        --color-text-primary: #111111;
+        --color-text-secondary: #666666;
+        --color-text-tertiary: #999999;
+        --color-text-danger: #991b1b;
+        --color-text-warning: #92400e;
+        --color-text-success: #166534;
+        --color-text-info: #1e40af;
+        --color-border-tertiary: rgba(0,0,0,0.12);
+        --color-border-secondary: rgba(0,0,0,0.25);
+        --color-border-primary: rgba(0,0,0,0.35);
+        --color-border-danger: #fca5a5;
+        --color-border-warning: #fcd34d;
+        --color-border-success: #86efac;
+        --color-border-info: #93c5fd;
+        --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        --font-serif: Georgia, serif;
+        --font-mono: 'Menlo', monospace;
+        --border-radius-md: 8px;
+        --border-radius-lg: 12px;
+        --border-radius-xl: 16px;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --color-background-primary: #1a1a1a;
+          --color-background-secondary: #242424;
+          --color-background-tertiary: #2e2e2e;
+          --color-background-danger: #2d1111;
+          --color-background-warning: #2d2100;
+          --color-background-success: #0d2818;
+          --color-background-info: #0d1f3c;
+          --color-text-primary: #f0f0f0;
+          --color-text-secondary: #a0a0a0;
+          --color-text-tertiary: #666666;
+          --color-text-danger: #fca5a5;
+          --color-text-warning: #fcd34d;
+          --color-text-success: #86efac;
+          --color-text-info: #93c5fd;
+          --color-border-tertiary: rgba(255,255,255,0.1);
+          --color-border-secondary: rgba(255,255,255,0.2);
+          --color-border-primary: rgba(255,255,255,0.3);
+          --color-border-danger: #7f1d1d;
+          --color-border-warning: #78350f;
+          --color-border-success: #14532d;
+          --color-border-info: #1e3a5f;
+        }
+      }
+      body { font-family: var(--font-sans); background: var(--color-background-tertiary); color: var(--color-text-primary); min-height: 100vh; }
+      #root { max-width: 960px; margin: 0 auto; padding: 24px 16px; }
+      button { font-family: var(--font-sans); background: var(--color-background-primary); border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); padding: 8px 16px; cursor: pointer; color: var(--color-text-primary); transition: background 0.15s; }
+      button:hover { background: var(--color-background-secondary); }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
