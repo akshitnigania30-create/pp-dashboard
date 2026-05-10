@@ -57,7 +57,7 @@ export default async (request) => {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${apiKey}`
         },
-        body: JSON.stringify({
+       body: JSON.stringify({
   model: "llama-3.3-70b-versatile",
   messages: [
     {
@@ -67,8 +67,7 @@ export default async (request) => {
         "\n\nIMPORTANT: Return ONLY valid JSON. No markdown, no explanation, no headings, no extra text."
     }
   ],
-  temperature: 0.1,
-  response_format: { type: "json_object" }
+  temperature: 0.1
 })
       }
     );
