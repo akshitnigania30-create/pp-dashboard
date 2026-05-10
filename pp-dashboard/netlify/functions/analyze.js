@@ -27,15 +27,12 @@ export default async (request) => {
 
   try {
     const body = await request.json();
-
     const messages = body.messages || [];
     const systemPrompt = body.system || "";
 
     const textParts = [];
 
-    if (systemPrompt) {
-      textParts.push(systemPrompt);
-    }
+    if (systemPrompt) textParts.push(systemPrompt);
 
     for (const msg of messages) {
       if (Array.isArray(msg.content)) {
@@ -49,68 +46,54 @@ export default async (request) => {
       }
     }
 
-    const response = await fetch(
-      "https://api.groq.com/openai/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiKey}`
-        },
-       body: JSON.stringify({
-  model: "llama-3.3-70b-versatile",
-  messages: [
-    {
-      role: "user",
-      content:
-        textParts.join("\n\n") +
-        "\n\nIMPORTANT: Return ONLY valid JSON. No markdown, no explanation, no headings, no extra text."
-    }
-  ],
-  temperature: 0.1
-})
-      }
-    );
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: "llama-3.3-70b-versatile",
+        messages: [
+          {
+            role: "user",
+            content:
+              textParts.join("\n\n") +
+              "\n\nIMPORTANT: Return ONLY valid JSON. No markdown, no explanation, no headings, no extra text. The response must start with { and end with }."
+          }
+        ],
+        temperature: 0.1
+      })
+    });
 
     const data = await response.json();
 
     if (!response.ok) {
       return new Response(JSON.stringify(data), {
         status: response.status,
-        headers: {
-          ...corsHeaders,
-          "Content-Type": "application/json"
-        }
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
       });
     }
 
-    const text =
-      data.choices?.[0]?.message?.content || "No response generated";
+    let text = data.choices?.[0]?.message?.content || "";
 
-    return new Response(
-      JSON.stringify({
-        content: [
-          {
-            type: "text",
-            text
-          }
-        ]
-      }),
-      {
-        status: 200,
-        headers: {
-          ...corsHeaders,
-          "Content-Type": "application/json"
-        }
-      }
-    );
+    text = text.replace(/```json/g, "").replace(/```/g, "").trim();
+
+    const start = text.indexOf("{");
+    const end = text.lastIndexOf("}");
+
+    if (start !== -1 && end !== -1 && end > start) {
+      text = text.slice(start, end + 1);
+    }
+
+    return new Response(JSON.stringify({ content: [{ type: "text", text }] }), {
+      status: 200,
+      headers: { ...corsHeaders, "Content-Type": "application/json" }
+    });
   } catch (err) {
     return new Response(JSON.stringify({ error: err.message }), {
       status: 500,
-      headers: {
-        ...corsHeaders,
-        "Content-Type": "application/json"
-      }
+      headers: { ...corsHeaders, "Content-Type": "application/json" }
     });
   }
 };
