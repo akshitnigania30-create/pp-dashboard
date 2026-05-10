@@ -58,15 +58,18 @@ export default async (request) => {
           "Authorization": `Bearer ${apiKey}`
         },
         body: JSON.stringify({
-          model: "llama-3.3-70b-versatile",
-          messages: [
-            {
-              role: "user",
-              content: textParts.join("\n\n")
-            }
-          ],
-          temperature: 0.1
-        })
+  model: "llama-3.3-70b-versatile",
+  messages: [
+    {
+      role: "user",
+      content:
+        textParts.join("\n\n") +
+        "\n\nIMPORTANT: Return ONLY valid JSON. No markdown, no explanation, no headings, no extra text."
+    }
+  ],
+  temperature: 0.1,
+  response_format: { type: "json_object" }
+})
       }
     );
 
