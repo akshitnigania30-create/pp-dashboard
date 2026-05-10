@@ -16,10 +16,10 @@ export default async (request) => {
     });
   }
 
-  const apiKey = Netlify.env.get("GEMINI_API_KEY");
+  const apiKey = Netlify.env.get("XAI_API_KEY");
 
   if (!apiKey) {
-    return new Response(JSON.stringify({ error: "API key not set" }), {
+    return new Response(JSON.stringify({ error: "XAI_API_KEY not set" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" }
     });
@@ -31,39 +31,34 @@ export default async (request) => {
     const systemPrompt = body.system || "";
 
     const textParts = [];
-
     if (systemPrompt) textParts.push(systemPrompt);
 
     for (const msg of messages) {
       if (Array.isArray(msg.content)) {
         for (const block of msg.content) {
-          if (block.type === "text" && block.text) {
-            textParts.push(block.text);
-          }
+          if (block.type === "text" && block.text) textParts.push(block.text);
         }
       } else if (msg.content) {
         textParts.push(msg.content);
       }
     }
 
-    const openRouterBody = {
-     model: "openrouter/free",
-      messages: [
-        {
-          role: "user",
-          content: textParts.join("\n\n")
-        }
-      ],
-      temperature: 0.1
-    };
-
-    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    const response = await fetch("https://api.x.ai/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${apiKey}`
       },
-      body: JSON.stringify(openRouterBody)
+      body: JSON.stringify({
+        model: "grok-4",
+        messages: [
+          {
+            role: "user",
+            content: textParts.join("\n\n")
+          }
+        ],
+        temperature: 0.1
+      })
     });
 
     const data = await response.json();
