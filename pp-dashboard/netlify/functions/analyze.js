@@ -88,5 +88,3 @@ export default async (request) => {
     });
   }
 };
-
-export const config = { path: "/api/analyze" };
